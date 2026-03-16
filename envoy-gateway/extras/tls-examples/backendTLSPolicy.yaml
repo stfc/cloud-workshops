@@ -1,0 +1,30 @@
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: BackendTLSPolicy
+metadata:
+  name: example-backend-tls-policy
+spec:
+  # target a service that expects HTTPS (443) traffic
+  targetRefs:
+    - group: ""
+      kind: Service
+      name: example-svc
+
+  validation:
+    # specify the Server Name Indication (SNI) that the Gateway uses to connect to the backend
+    # ususally a K8s internal domain
+    # <service-name>.<namespace>.svc.cluster.local
+    hostname: example-svc.default.svc.cluster.local
+
+    # you need to deploy a configmap that contains one or more references to PEM-encoded CA TLS certificates,
+    # which are used to establish a TLS handshake between the Gateway and backend Pod.
+
+    # Either CACertificateRefs or WellKnownCACertificates needs to be specified
+    caCertificateRefs:
+      - group: ""
+        kind: ConfigMap
+        name: ca-bundle
+
+    # Present client cert for client cert verification
+    # clientCertificateRef:
+    #  kind: Secret
+    #  name: gateway-client-cert

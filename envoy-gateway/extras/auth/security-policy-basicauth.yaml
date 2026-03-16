@@ -1,0 +1,14 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: basic-auth-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: nginx-envoy-httproute # attach to your HTTPRoute, not the Gateway
+  basicAuth:
+    users:
+      name: basic-auth-secret # references secret containing SHA htpasswds
+      kind: Secret

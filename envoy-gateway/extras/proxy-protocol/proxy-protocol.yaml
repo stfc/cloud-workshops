@@ -1,0 +1,23 @@
+---
+# setup proxy protocol mode on envoy gateway
+# equivalent to "use-proxy-protocol" in Nginx - and adds the Client Address into the X-Forwarded-For header.
+# need to set service annotation loadbalancer.openstack.org/proxy-protocol: "true" for envoyproxy
+# must be same namespace as the Gateway
+
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+  name: enable-proxy-protocol
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: example-gateway
+  enableProxyProtocol: true
+  proxyProtocol:
+    optional: false
+    version: V1
+  clientIPDetection:
+    xForwardedFor:
+      # set this to exactly the number of proxies between the internet and envoy
+      numTrustedHops: 1 # same as xff_num_trusted_hops in raw Envoy

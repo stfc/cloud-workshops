@@ -1,0 +1,29 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: example-tls-gateway
+  annotations:
+  # cert-manager annotation creates certs specified for each tls secret in specified listeners
+  cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  gatewayClassName: envoy
+  # sets up listener on port 443
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+
+      # cert-manager will create TLS certificate and it will be letsencrypt signed
+      tls:
+        # gateway will terminate TLS, by default, will pass as HTTP to the backend
+        # you can re-encrypt with internal TLS by setting backendTLSPolicy - see backendTLSPolicy.yaml
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: letsencrypt-tls
+
+      hostname: "tls.example.com"
+
+      allowedRoutes:
+        namespaces:
+          from: Same
