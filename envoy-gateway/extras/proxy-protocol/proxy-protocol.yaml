@@ -13,10 +13,8 @@ spec:
     - group: gateway.networking.k8s.io
       kind: Gateway
       name: example-gateway
-  enableProxyProtocol: true
   proxyProtocol:
     optional: false
-    version: V1
   clientIPDetection:
     xForwardedFor:
       # set this to exactly the number of proxies between the internet and envoy
