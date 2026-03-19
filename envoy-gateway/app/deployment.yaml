@@ -35,7 +35,8 @@ spec:
             - containerPort: 80
           volumeMounts:
             - name: template-volume
-              mountPath: /template/
+              mountPath: /template/index.html
+              subPath: index.html
           env:
             - name: POD_NAME
               valueFrom:
