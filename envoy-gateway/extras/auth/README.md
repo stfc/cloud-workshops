@@ -9,7 +9,6 @@ This example re-uses the existing gateway and example app deployed in `envoy-gat
 
 # Build the file
 htpasswd -csb /tmp/pass alice password1
-htpasswd -b  /tmp/pass bob password2
 
 # Create the secret from the file 
 kubectl create secret generic basic-auth-secret \

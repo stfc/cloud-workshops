@@ -52,7 +52,6 @@ You can then apply the example deployment under `app` folder to deploy a simple 
 
 ```
 cd ../app
-kubectl create configmap nginx-html-template --from-file=index.html -n nginx
 kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
 kubectl apply -f httproute.yaml
