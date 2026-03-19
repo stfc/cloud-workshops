@@ -1,0 +1,74 @@
+# Sets up an internal cluster issuer to manage all internal TLS certs
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: internal-bootstrap
+spec:
+  selfSigned: {}
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: internal-ca
+spec:
+  isCA: true
+  commonName: internal-ca
+  secretName: internal-ca-secret
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: internal-bootstrap
+    kind: ClusterIssuer
+    group: cert-manager.io
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: internal-ca-issuer
+spec:
+  ca:
+    secretName: internal-ca-secret
+
+---
+apiVersion: trust.cert-manager.io/v1alpha1
+kind: Bundle
+metadata:
+  name: "internal-bundle"
+spec:
+  sources:
+    - useDefaultCAs: true
+
+    - secret:
+        name: "internal-ca-secret"
+        key: "tls.crt"
+
+  target:
+    configMap:
+      key: "ca.crt"
+
+    # you can set labels on namespaces and select on that so you only deploy this bundle in
+    # namespaces that require it instead of all of them
+    # namespaceSelector:
+
+---
+# sets up internal cert that mount onto the HTTPS endpoint
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: example-backend-cert
+spec:
+  commonName: example-backend-cert
+  secretName: backend-tls
+  duration: 87600h0m0s # 10yr
+  renewBefore: 8760h0m0s # 1yr
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS8
+    size: 2048
+  issuerRef:
+    group: ""
+    kind: ClusterIssuer
+    name: internal-ca-issuer

@@ -1,0 +1,15 @@
+# Backend is a way to establish inesecure TLS connection to backend services
+# you still need to mount tls secrets to your pod but we won't verify the root-ca so you can use self-signed certs
+
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: example-backend-insecure-tls
+spec:
+  endpoints:
+    # specify the service fqdn and port
+    - fqdn:
+        - hostname: example-svc.default.svc.cluster.local
+          port: 8443
+  tls:
+    insecureSkipVerify: true

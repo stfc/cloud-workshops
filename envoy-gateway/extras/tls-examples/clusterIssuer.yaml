@@ -1,0 +1,23 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    email: user@example.com
+    # lets encrypt staging
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+
+    # lets encrypt prod
+    #   server: https://acme-v02.api.letsencrypt.org/directory
+
+    privateKeySecretRef:
+      name: letsencrypt-private-key
+
+    solvers:
+      - http01:
+          gatewayHTTPRoute:
+            parentRefs:
+              - name: letsencrypt-gateway
+                kind: Gateway
+                group: gateway.networking.k8s.io

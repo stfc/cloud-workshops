@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-tls-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example-tls
+  template:
+    metadata:
+      labels:
+        app: example-tls
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.25
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8443
+          volumeMounts:
+            - name: tls
+              mountPath: /etc/nginx/tls
+              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
+      volumes:
+        - name: tls
+          secret:
+            secretName: backend-tls
+        - name: nginx-conf
+          configMap:
+            name: nginx-https-config
+
+---
+# simple nginx service that sets up tls and sends back a 200 if connected
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-https-config
+data:
+  default.conf: |
+    server {
+      listen 8443 ssl;
+
+      ssl_certificate     /etc/nginx/tls/tls.crt;
+      ssl_certificate_key /etc/nginx/tls/tls.key;
+
+      location / {
+        return 200 "Hello from HTTPS backend\n";
+      }
+    }
+
+---
+# HTTPS service
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-tls-svc
+spec:
+  selector:
+    app: example-tls
+  ports:
+    - port: 8443
+      targetPort: 8443
